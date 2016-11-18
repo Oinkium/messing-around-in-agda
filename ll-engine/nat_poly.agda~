@@ -1,0 +1,51 @@
+module nat_poly where
+
+open import Agda.Builtin.Nat
+  renaming (_+_ to _+'_)
+
+data ℕPolynomial : Set where
+  zer : ℕPolynomial
+  suc : (p : ℕPolynomial) -> ℕPolynomial
+  timesX : (p : ℕPolynomial) -> ℕPolynomial
+
+constant : Nat -> ℕPolynomial
+constant zero = zer
+constant (suc N) = suc(constant N)
+
+one : ℕPolynomial
+one = constant 1
+
+X : ℕPolynomial
+X = timesX one
+
+_+_ : (p : ℕPolynomial) -> ((q : ℕPolynomial) -> ℕPolynomial)
+p + zer = p
+p + (suc Q) = suc(p + Q)
+zer + q = q
+(suc P) + q = suc(P + q)
+(timesX P) + (timesX Q) = timesX (P + Q)
+
+_×_ : (p : ℕPolynomial) -> ((q : ℕPolynomial) -> ℕPolynomial)
+p × zer = zer
+p × (suc Q) = (p × Q) + p
+p × (timesX Q) = timesX (p × Q)
+
+-- This is a function to split a polynomial p up as
+--  p = qX + c
+
+LeadingCoefficient : ℕPolynomial -> Nat
+LeadingCoefficient zer = 0
+LeadingCoefficient (suc P) = suc(LeadingCoefficient P)
+LeadingCoefficient (timesX P) = 0
+
+QuotientByX
+
+-- Textual representation of polynomials
+
+open import Agda.Builtin.String
+
+-- PolyToString : ℕPolynomial -> String
+-- PolyToString zer = "0"
+-- PolyToString 
+
+

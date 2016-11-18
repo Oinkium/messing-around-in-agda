@@ -1,0 +1,77 @@
+module nat_poly where
+
+open import Agda.Builtin.Nat
+  renaming (_+_ to _+'_; _-_ to _-'_)
+
+data ℕPolynomial : Set where
+  zer : ℕPolynomial
+  suc : (p : ℕPolynomial) -> ℕPolynomial
+  timesX : (p : ℕPolynomial) -> ℕPolynomial
+
+constant : Nat -> ℕPolynomial
+constant zero = zer
+constant (suc N) = suc(constant N)
+
+one : ℕPolynomial
+one = constant 1
+
+X : ℕPolynomial
+X = timesX one
+
+_+_ : (p : ℕPolynomial) -> ((q : ℕPolynomial) -> ℕPolynomial)
+p + zer = p
+p + (suc Q) = suc(p + Q)
+zer + q = q
+(suc P) + q = suc(P + q)
+(timesX P) + (timesX Q) = timesX (P + Q)
+
+_×_ : (p : ℕPolynomial) -> ((q : ℕPolynomial) -> ℕPolynomial)
+p × zer = zer
+p × (suc Q) = (p × Q) + p
+p × (timesX Q) = timesX (p × Q)
+
+-- Subtraction where each coefficient is saturated below by 0
+--  e.g. : x²+x+3 - x³+2x+1 = 0x³+x²+0x+2
+_-_ : (p : ℕPolynomial) -> ((q : ℕPolynomial) -> ℕPolynomial)
+p - zer = p
+zer - suc Q = zer
+zer - (timesX Q) = zer
+(suc P) - (suc Q) = P - Q
+(timesX P) - (suc Q) = (timesX P) - Q
+(suc P) - (timesX Q) = suc(P - (timesX Q))
+(timesX P) - (timesX Q) = timesX (P - Q)
+
+degree : (p : ℕPolynomial) -> Nat
+degree zer = 1
+degree (suc P) = degree P
+degree (timesX P) = suc (degree P)
+
+evaluateAt : (p : ℕPolynomial) -> (Nat -> Nat)
+evaluateAt zer n = zero
+evaluateAt (suc P) n = suc(evaluateAt P n)
+evaluateAt (timesX P) n = n * (evaluateAt P n)
+
+derivative : (p : ℕPolynomial) -> ℕPolynomial
+derivative zer = zer
+derivative (suc P) = derivative P
+derivative (timesX P) = P + (timesX (derivative P))
+
+NᵗʰDerivative : Nat -> ((p : ℕPolynomial) -> ℕPolynomial)
+NᵗʰDerivative zero p = p
+NᵗʰDerivative (suc N) p = derivative (NᵗʰDerivative N p)
+
+ConstantCoefficient : (p : ℕPolynomial) -> Nat
+ConstantCoefficient p = evaluateAt p zero
+
+LeadingCoefficient : (p : ℕPolynomial) -> Nat
+LeadingCoefficient p = evaluateAt(NᵗʰDerivative ((degree p) -' 1) p) 0
+
+-- Textual representation of polynomials
+
+open import Agda.Builtin.String
+
+-- PolyToString : ℕPolynomial -> String
+-- PolyToString zer = "0"
+-- PolyToString 
+
+
