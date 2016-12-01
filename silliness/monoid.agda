@@ -25,8 +25,8 @@ PreMonoid {A} = (FreeMonoidSet A) -> A
 data _≡_ {X} : X -> (X -> Set) where
   refl : (x : X) -> x ≡ x
 
-AssociativityProof : {A : Set} -> PreMonoid {A} -> Set
-AssociativityProof PM = (λ 𝔏 -> PM (MonadAction 𝔏)) ≡ (λ 𝔏 -> PM ((PM *) 𝔏))
+AssociativityProof : {A : Set} -> {PreMonoid {A}} -> Set
+AssociativityProof {PM} = (λ 𝔏 -> PM (MonadAction 𝔏)) ≡ (λ 𝔏 -> PM ((PM *) 𝔏))
 
 FreeMonoid : (A : Set) -> PreMonoid {FreeMonoidSet A}
 FreeMonoid A L = MonadAction {A} L
