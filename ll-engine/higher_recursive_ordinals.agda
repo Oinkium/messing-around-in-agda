@@ -52,6 +52,39 @@ HamiltonSucc f n = succ(f n)
 HamiltonLimit : (ℕ -> NatFunc) -> NatFunc
 HamiltonLimit s n = s n n
 
+-- Concrete implementation as sets.
+-- We use the hierarchy where:
+--  - S₀ = ω
+--  - Sₐ₊₁ = 𝒫(Sₐ)
+--  If l = limₙ aₙ then
+--    Sₗ = ⋃ₐₙ Sₐₙ
+
+-- Empty set
+data ∅ : Set where
+
+--Boolean type
+data Bool : Set where
+  ⊤ : Bool
+  ⊥ : Bool
+
+-- Power set
+𝒫 : Set -> Set
+𝒫 A = A -> Bool
+
+-- (Disjoint) union of sets
+data Σ (A : Set) (B : A -> Set) : Set where
+  _,_ : (a : A) -> B a -> Σ A B
+
+-- Defining the hierarchy
+SetZero : Set
+SetZero = ℕ
+
+SetSucc : Set -> Set
+SetSucc A = 𝒫 A
+
+SetLimit : (ℕ -> Set) -> Set
+SetLimit s = Σ ℕ s
+
 -- Higher recursive types
 Ordinal' : Set -> Set
 Ordinal' X = Ordinal X -> Ordinal X

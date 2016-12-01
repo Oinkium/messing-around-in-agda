@@ -1,0 +1,7 @@
+module graphs where
+
+open import mltt
+
+record Graph (vertices : Set) : Set where
+  field
+    edges : vertices → vertices → 2
