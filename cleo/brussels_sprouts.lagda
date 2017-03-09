@@ -66,15 +66,18 @@ open import Data.Empty
 open import Data.Sum
   renaming (_⊎_ to _⊔_)
 open import Data.Product
-open import Data.Nat
+open import Agda.Builtin.Nat
   renaming (Nat to ℕ)
+open import Relation.Binary.PropositionalEquality
+  hiding ([_])
+open import Data.Bool
 
 data ✶ : Set where
   ⋆ : ✶
 
 finiteSet : ℕ → Set
-finiteSet (zero) = ∅
-finiteSet (succ n) = (finiteSet n) ⊔ ✶
+finiteSet zero = ∅
+finiteSet (suc n) = (finiteSet n) ⊔ ✶
 
 \end{code}
 
@@ -89,16 +92,36 @@ data cross : Set where
   west : cross
 
 data bsPlay (n : ℕ) : Set
-crosses : bsPlay n → Set
-edges : bsPlay n → Set
-source : (p : bsPlay n) → edges p → vertices p
-target : (p : bsPlay n) → edges p → vertices p
-faces : bsPlay n → Set
-crossbarFaces : (p : bsPlay n) → crosses p → cross → faces p
+crosses : {n : ℕ} → bsPlay n → Set
+edges : {n : ℕ} → bsPlay n → Set
+source : {n : ℕ} → (p : bsPlay n) → edges p → crosses p
+target : {n : ℕ} → (p : bsPlay n) → edges p → crosses p
+connected : {n : ℕ} → (p : bsPlay n) → (v : crosses p) → (w : crosses p) → Bool
+faces : {n : ℕ} → bsPlay n → Set
+crossbarFaces : {n : ℕ} → (p : bsPlay n) → crosses p → cross → faces p
 
 data bsPlay (n : ℕ) where
   startingPlay : bsPlay n
-  addLine : (p : bsPlay) → (f : faces p) → (v : vertices p) → 
+  addLine : (p : bsPlay n) → (v : crosses p) → (x : cross) → (w : crosses p) → (y : cross) → (crossbarFaces p v x) ≡ (crossbarFaces p w y) → bsPlay n
+
+crosses {n} startingPlay = finiteSet n
+crosses (addLine p v x w y P) = (crosses p) ⊔ ✶
+
+edges startingPlay = ∅
+edges (addLine p v x w y P) = (edges p) ⊔ ( ✶ ⊔ ✶ )
+
+source startingPlay ()
+source (addLine p v x w y P) = [ (λ e → (inj₁ (source p e))) , ([ (λ _ → (inj₁ v)) , (λ _ → (inj₁ w)) ]) ]
+
+target startingPlay ()
+target (addLine p v x w y P) = [ (λ e → (inj₁ (target p e))) , [ (λ _ → (inj₂ ⋆)) , (λ _ → (inj₂ ⋆)) ] ]
+
+connected startingPlay v w = false
+connected (addLine p v x w y p) 
+
+faces {n} startingPlay = ✶
+
+crossbarFaces {n} startingPlay v x = ⋆
 
 \end{code}
 
