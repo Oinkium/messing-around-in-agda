@@ -1,0 +1,123 @@
+module NotGp where
+
+open import WrongGp
+
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality
+  using (_≡_)
+open import Relation.Nullary
+open import Algebra.Structures
+
+open import Algebra.FunctionProperties
+
+open import Data.Product
+
+open import Level
+
+data notGp : Set where
+  e : notGp
+  x : notGp
+  _✶_ : notGp → notGp → notGp
+  _⁻¹ : notGp → notGp
+
+infix 0 _≈_
+
+data _≈_ : Rel notGp Level.zero where
+  refl    : Reflexive _≈_
+  sym     : Symmetric _≈_
+  trans   : Transitive _≈_
+  assoc   : Associative _≈_ _✶_
+  rightId : RightIdentity _≈_ e _✶_
+  leftInv : LeftInverse _≈_ e _⁻¹ _✶_
+  ✶-cong  : _✶_ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
+  ⁻¹-cong : _⁻¹ Preserves _≈_ ⟶ _≈_
+
+isSemiGp : IsSemigroup _≈_ _✶_
+isSemiGp = record {
+  isEquivalence = record {
+    refl  = refl;
+    sym   = sym;
+    trans = trans};
+  assoc  = assoc;
+  ∙-cong = ✶-cong}
+  
+
+isWrongGp : IsWrongGp _≈_ _✶_ e _⁻¹
+isWrongGp = record {
+  isSemigroup   = isSemiGp;
+  rightIdentity = rightId;
+  leftInverse   = leftInv;
+  ⁻¹-cong       = ⁻¹-cong}
+
+NotGp : WrongGp Level.zero Level.zero
+NotGp = record {
+  Carrier   = notGp;
+  _≈_       = _≈_;
+  _✶_       = _✶_;
+  e         = e;
+  _⁻¹       = _⁻¹;
+  isWrongGp = isWrongGp}
+
+-- e✶x≠x : ¬ (e ✶ x ≈ x)
+-- x≠e✶x : ¬ (x ≈ e ✶ x)
+-- e✶x=a⇒a≠x : ∀ {a} → (e ✶ x ≈ a) → ¬ (a ≈ x)
+-- a=e✶x⇒a≠x : ∀ {a} → (a ≈ e ✶ x) → ¬ (a ≈ x)
+-- 
+-- e✶x≠x (sym x=e✶x) = x≠e✶x x=e✶x
+-- e✶x≠x (trans e✶x=a a=x) = e✶x=a⇒a≠x e✶x=a a=x
+-- 
+-- x≠e✶x (sym e✶x=x) = e✶x≠x e✶x=x
+-- x≠e✶x (trans x=a a=e✶x) = {!!}
+-- 
+-- e✶x=a⇒a≠x refl = e✶x≠x
+-- e✶x=a⇒a≠x (sym a=e✶x) = a=e✶x⇒a≠x a=e✶x
+-- e✶x=a⇒a≠x (trans e✶x=b b=a) a=x = e✶x=a⇒a≠x e✶x=b (trans b=a a=x)
+-- e✶x=a⇒a≠x (✶-cong e=a′ x=a′′) = {!!}
+-- 
+-- a=e✶x⇒a≠x refl = e✶x≠x
+-- a=e✶x⇒a≠x (sym e✶x=a) = e✶x=a⇒a≠x e✶x=a
+-- a=e✶x⇒a≠x (trans a=b b=e✶x) a=x = a=e✶x⇒a≠x b=e✶x (trans (sym a=b) a=x)
+-- a=e✶x⇒a≠x (rightId e✶x) = {!!}
+-- a=e✶x⇒a≠x (✶-cong a′=e a′′=x) = {!!}
+
+e≉x : ¬ (e ≈ x)
+x≉e : ¬ (x ≈ e)
+e≈a⇒a≉x : ∀ {a} → (e ≈ a) → ¬ (a ≈ x)
+a≈e⇒a≉x : ∀ {a} → (a ≈ e) → ¬ (a ≈ x)
+
+e≉x (sym x≈e) = x≉e x≈e
+e≉x (trans e≈a a≈x) = e≈a⇒a≉x e≈a a≈x
+
+x≉e (sym e≈x) = e≉x e≈x
+x≉e (trans x≈a a≈e) = {!!}
+
+e≈a⇒a≉x refl = e≉x
+e≈a⇒a≉x (sym a≈e) = a≈e⇒a≉x a≈e
+e≈a⇒a≉x (trans e≈b b≈a) a≈x = e≈a⇒a≉x e≈b (trans b≈a a≈x)
+
+a≈e⇒a≉x refl = e≉x
+a≈e⇒a≉x (sym e≈a) = e≈a⇒a≉x e≈a
+
+first : notGp → notGp
+first e = e
+first x = x
+first (s ✶ t) = first s
+first (s ⁻¹) = first s
+
+first-homo : (s t : notGp) → first (s ✶ t) ≡ first ((first s) ✶ (first t))
+first-homo e _ = _≡_.refl
+first-homo x _ = _≡_.refl
+first-homo (s ✶ t) _ = first-homo s t
+first-homo (s ⁻¹) t = first-homo s t
+
+first[e✶s]≡e : ∀ s → first (e ✶ s) ≡ e
+first[e✶s]≡e _ = _≡_.refl
+
+first-✶-cong : first Preserves _≈_ ⟶ _≡_
+first-✶-cong {e} {e} _ = _≡_.refl
+
+-- There exists a wronggp that is not a gp.
+
+wrongGpNotGp : ∃ {A = WrongGp Level.zero Level.zero} (λ W →
+  (∃ (λ x → ¬ (e ✶ x ≈ x))))
+wrongGpNotGp = NotGp , (x , {!!})

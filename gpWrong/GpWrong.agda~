@@ -1,0 +1,93 @@
+module GpWrong where
+
+open import Data.Nat
+open import Data.Nat.Properties
+open Data.Nat.Properties.SemiringSolver
+open import Data.Bool
+open import Relation.Binary.PropositionalEquality
+open ≡-Reasoning
+open import Data.Product
+open import Relation.Nullary using (¬_)
+
+open import Level
+
+open import WrongGp
+
+record wrong : Set where
+  constructor e^_x^_x⁻¹^_
+  field
+    identity? : Bool
+    x : ℕ
+    x⁻¹ : ℕ
+
+_✶_ : wrong → wrong → wrong
+r ✶ s = record { identity? = wrong.identity? r
+  ; x = (wrong.x r) + ((wrong.x s) ∸ (wrong.x⁻¹ r))
+  ; x⁻¹ = (wrong.x⁻¹ s) + ((wrong.x⁻¹ r) ∸ (wrong.x s)) }
+
+✶-assoc-id? : ∀ r s t → wrong.identity? ((r ✶ s) ✶ t) ≡ wrong.identity? (r ✶ (s ✶ t))
+✶-assoc-id? r s t = refl
+
+✶-assoc-x : ∀ r s t → wrong.x ((r ✶ s) ✶ t) ≡ wrong.x (r ✶ (s ✶ t))
+✶-assoc-x r s t = let x : ℕ
+                      x = wrong.x r
+                      x′ : ℕ
+                      x′ = wrong.x s
+                      x′′ : ℕ
+                      x′′ = wrong.x t
+                      x⁻¹ : ℕ
+                      x⁻¹ = wrong.x⁻¹ r
+                      x⁻¹′ : ℕ
+                      x⁻¹′ = wrong.x⁻¹ s
+                   in begin
+  (x + (x′ ∸ x⁻¹)) + (x′′ ∸ (x⁻¹′ + (x⁻¹ ∸ x′)))
+    ≡⟨ cong ((x + (x′ ∸ x⁻¹)) +_) (sym (∸-+-assoc x′′ x⁻¹′ (x⁻¹ ∸ x′))) ⟩
+  (x + (x′ ∸ x⁻¹)) + ((x′′ ∸ x⁻¹′) ∸ (x⁻¹ ∸ x′))
+    ≡⟨ solve 3 (λ a b c → (a :+ b) :+ c := a :+ (c :+ b)) refl x (x′ ∸ x⁻¹) ((x′′ ∸ x⁻¹′) ∸ (x⁻¹ ∸ x′)) ⟩
+  x + (((x′′ ∸ x⁻¹′) ∸ (x⁻¹ ∸ x′)) + (x′ ∸ x⁻¹))
+    ≡⟨ cong (x +_) (i∸k∸j+j∸k≡i+j∸k (x′′ ∸ x⁻¹′) x′ x⁻¹) ⟩
+  x + (((x′′ ∸ x⁻¹′) + x′) ∸ x⁻¹)
+    ≡⟨ cong (λ s → x + (s ∸ x⁻¹)) (+-comm (x′′ ∸ x⁻¹′) x′) ⟩
+  x + ((x′ + (x′′ ∸ x⁻¹′)) ∸ x⁻¹)
+    ∎
+
+✶-assoc-x⁻¹ : ∀ r s t → wrong.x⁻¹ ((r ✶ s) ✶ t) ≡ wrong.x⁻¹ (r ✶ (s ✶ t))
+✶-assoc-x⁻¹ r s t = let x′ : ℕ
+                        x′ = wrong.x s
+                        x′′ : ℕ
+                        x′′ = wrong.x t
+                        x⁻¹ : ℕ
+                        x⁻¹ = wrong.x⁻¹ r
+                        x⁻¹′ : ℕ
+                        x⁻¹′ = wrong.x⁻¹ s
+                        x⁻¹′′ = wrong.x⁻¹ t
+                     in begin
+  x⁻¹′′ + ((x⁻¹′ + (x⁻¹ ∸ x′)) ∸ x′′)
+    ≡⟨ cong (λ s → x⁻¹′′ + (s ∸ x′′)) (+-comm x⁻¹′ (x⁻¹ ∸ x′)) ⟩
+  x⁻¹′′ + (((x⁻¹ ∸ x′) + x⁻¹′) ∸ x′′)
+    ≡⟨ cong (x⁻¹′′ +_) (sym (i∸k∸j+j∸k≡i+j∸k (x⁻¹ ∸ x′) x⁻¹′ x′′)) ⟩
+  x⁻¹′′ + (((x⁻¹ ∸ x′) ∸ (x′′ ∸ x⁻¹′)) + (x⁻¹′ ∸ x′′))
+    ≡⟨ solve 3 (λ a b c → a :+ (b :+ c) := (a :+ c) :+ b) refl x⁻¹′′ ((x⁻¹ ∸ x′) ∸ (x′′ ∸ x⁻¹′)) (x⁻¹′ ∸ x′′) ⟩
+  (x⁻¹′′ + (x⁻¹′ ∸ x′′)) + ((x⁻¹ ∸ x′) ∸ (x′′ ∸ x⁻¹′))
+    ≡⟨ cong ((x⁻¹′′ + (x⁻¹′ ∸ x′′)) +_) (∸-+-assoc x⁻¹ x′ (x′′ ∸ x⁻¹′)) ⟩
+  (x⁻¹′′ + (x⁻¹′ ∸ x′′)) + (x⁻¹ ∸ (x′ + (x′′ ∸ x⁻¹′)))
+    ∎
+
+cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d} {x x′ : A} {y y′ : B} {z z′ : C} (f : A → B → C → D) → x ≡ x′ → y ≡ y′ → z ≡ z′ → f x y z ≡ f x′ y′ z′
+cong₃ f refl refl refl = refl
+
+✶-assoc : ∀ r s t → (r ✶ s) ✶ t ≡ r ✶ (s ✶ t)
+✶-assoc r s t = cong₃ e^_x^_x⁻¹^_ (✶-assoc-id? r s t) (✶-assoc-x r s t) (✶-assoc-x⁻¹ r s t)
+
+-- The point is to show that there is a wrongGp that is not a group.
+
+wrongAsWrongGp : WrongGp Level.zero Level.zero
+wrongAsWrongGp = record {
+  Carrier = wrong;
+  _≈_ = _≡_;
+  _✶_ = _✶_;
+  e   = 
+
+wrongGpButNotGp : {c ℓ : Level} → ∃ {A = WrongGp c ℓ} (λ W →
+  (∃ (λ x → (¬ ((WrongGp._✶_ W) (WrongGp.e W) x ≡ x)))))
+wrongGpButNotGp = {!!}

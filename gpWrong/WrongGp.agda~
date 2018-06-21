@@ -1,0 +1,29 @@
+module WrongGp where
+
+open import Relation.Binary
+
+import Algebra.FunctionProperties as FunctionProperties
+open import Level using (_⊔_; suc)
+open import Algebra.Structures
+
+open FunctionProperties using (Op₁; Op₂)
+
+record IsWrongGp {a ℓ} {A : Set a} (≈ : Rel A ℓ)
+                 (✶ : Op₂ A) (e : A) (⁻¹ : Op₁ A) : Set (a ⊔ ℓ) where
+  open FunctionProperties ≈
+  field
+    isSemigroup : IsSemigroup ≈ ✶
+    rightIdentity : RightIdentity e ✶
+    leftInverse : LeftInverse e ⁻¹ ✶
+
+record WrongGp c ℓ : Set (suc (c ⊔ ℓ)) where
+  infixl 7 _✶_
+  infix  4 _≈_
+  field
+    Carrier   : Set c
+    _≈_       : Rel Carrier ℓ
+    _✶_       : Op₂ Carrier
+    e         : Carrier
+    _⁻¹       : Op₁ Carrier
+    isWrongGp : IsWrongGp _≈_ _✶_ e _⁻¹
+    

@@ -1,0 +1,4 @@
+open import Relation.Nullary
+
+module Continuations where
+

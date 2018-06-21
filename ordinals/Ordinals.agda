@@ -54,3 +54,12 @@ _^_ = λ α → λ β → β (succ zero) (λ γ → γ × α) lim
 
 test : {A : Set} → O A
 test = ω ^ ω ^ ω ^ ω ^ ω ^ ω
+
+postulate
+  ⁇ : ℕ
+
+data ℂ : Set where
+  OK : ℂ
+
+realize : O ℂ → ℂ
+realize = λ α → α OK (λ x → x) (λ f → (f ⁇))

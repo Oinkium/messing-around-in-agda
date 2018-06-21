@@ -1,0 +1,33 @@
+open import Categories.Category
+
+module CommutativeDiagrams {o ℓ ee} (𝒞 : Category o ℓ ee) where
+
+open import Level
+  using (_⊔_)
+
+open Category 𝒞
+
+_-_⟶_ : {A B : Obj} → Obj → A ⇒ B → Obj → A ⇒ B
+A - f ⟶ B = f
+―
+_⟶_-_ : {A B C : Obj} → A ⇒ B → Obj → B ⇒ C → A ⇒ C
+f ⟶ B - g = g ∘ f
+
+_↓ : {A B : Obj} → A ⇒ B → A ⇒ B
+f ↓ = f
+
+↓_ : {A B : Obj} → A ⇒ B → A ⇒ B
+↓ f = f
+
+record Square : Set (o ⊔ ℓ) where
+  constructor
+  field
+    nw : Obj
+    ne : Obj
+    sw : Obj
+    se : Obj
+    n : nw ⇒ ne
+    w : nw ⇒ sw
+    e : ne ⇒ se
+    s : sw ⇒ se
+
