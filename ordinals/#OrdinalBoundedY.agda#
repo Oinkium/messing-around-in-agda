@@ -1,0 +1,7 @@
+module OrdinalBoundedY where
+
+-- Divergence
+
+postulate
+  Ω : {X : Set} → X
+
